@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="vieAI DOCUMENwport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="home.css">
+    <title>AI Document Auditor</title>
+</head>
+<body>
+    <h1>AI Document Auditor</h1>
+    <br>
+    <form action="/docsave" method="post" enctype="multipart/form-data">    
+        <label for="file" id="fileSelector">Selecione a foto da sua nota fiscal<br>(.png, .jpg, .pdf)</label>
+        <input type="file" id="file" name="doc" accept="image/*,.pdf">
+
+        <input type="submit" class="btn"  value="Analisar Arquivo">
+    </form>
+
+    <script src="home.js"></script>
+</body>
+</html>
