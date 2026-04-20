@@ -30,6 +30,7 @@ form {
     background-color: #fff;
     border: 1px solid #000;
     padding: 10px;
+
 }
 .btn:hover {
     background-color: #dddddd;
@@ -40,4 +41,8 @@ form {
     background-color: #aeaeae;
     border: 1px solid #000;
     padding: 10px;
+}
+
+#loading {
+    display: none;
 }

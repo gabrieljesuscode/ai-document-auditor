@@ -10,10 +10,16 @@
     <h1>AI Document Auditor</h1>
     <br>
     <form action="/docsave" method="post" enctype="multipart/form-data">    
-        <label for="file" id="fileSelector">Selecione a foto da sua nota fiscal<br>(.png, .jpg, .pdf)</label>
+        
+        <label for="file" id="fileSelector">
+            Selecione a foto da sua nota fiscal
+            <br>(.png, .jpg, .pdf)<br>
+            <span id="loading"></span>
+        </label>
+
         <input type="file" id="file" name="doc" accept="image/*,.pdf">
 
-        <input type="submit" class="btn"  value="Analisar Arquivo">
+        <input type="submit" class="btn" id="submitBtn" value="Analisar Arquivo" disabled>
     </form>
 
     <script src="home.js"></script>
