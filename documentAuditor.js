@@ -3,19 +3,19 @@ const { raw } = require('express');
 const fs = require('fs');
 require('dotenv').config()
 
-const CLOUDFLARE_ACCOUNT_ID = process.env.CLOUDFLARE_ACCOUNT_ID;
+const CLOUDFLARE_ACCOUNT_ID = `https://api.cloudflare.com/client/v4/accounts/${process.env.CLOUDFLARE_ACCOUNT_ID}/ai/run/@cf/meta/llama-3.2-11b-vision-instruct`;
 
-const CLOUDFLARE_API_TOKEN = process.env.CLOUDFLARE_API_TOKEN;
+const CLOUDFLARE_API_TOKEN = `Bearer ${process.env.CLOUDFLARE_API_TOKEN}`;
 
 async function licenseAgreement(){
     console.log("Iniciando concordar com a licença");
 
     const response = await fetch(
-        "https://api.cloudflare.com/client/v4/accounts/0c75d8a124d24c93457da4f8371f72f2/ai/run/@cf/meta/llama-3.2-11b-vision-instruct",
+        CLOUDFLARE_ACCOUNT_ID,
         {
             method: "POST",
             headers: {
-                Authorization: "Bearer TOKEN_REMOVIDO"
+                Authorization: CLOUDFLARE_API_TOKEN
             },
             body: JSON.stringify({
                 prompt: "agree"
@@ -72,11 +72,11 @@ async function auditDocument(imagePath) {
 
     // 3. Fazer a chamada única para o Cloudflare
     const response = await fetch(
-    'https://api.cloudflare.com/client/v4/accounts/0c75d8a124d24c93457da4f8371f72f2/ai/run/@cf/meta/llama-3.2-11b-vision-instruct',
+    CLOUDFLARE_ACCOUNT_ID,
     {
         method: 'POST',
         headers: {
-        'Authorization': 'Bearer TOKEN_REMOVIDO',
+        'Authorization': CLOUDFLARE_API_TOKEN,
         'Content-Type': 'application/json'
         },
         body: JSON.stringify({
