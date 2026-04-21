@@ -1,4 +1,6 @@
-const { Mistral } = require('@mistralai/mistralai');
+const mistralModule = await import('@mistralai/mistralai');
+const Mistral = mistralModule.Mistral;
+
 const Tesseract = require('tesseract.js');
 require('dotenv').config();
 
