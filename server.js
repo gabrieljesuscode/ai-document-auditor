@@ -1,14 +1,7 @@
 const express = require('express');
-const auditDocument = require('./documentAuditor')
+const auditDocument = require('./documentAuditor');
 const multer = require('multer');
-const storage = multer.diskStorage({
-    destination: function (req, file, cb) {
-        cb(null, './uploads');
-    },
-    filename: function (req, file, cb) {
-        cb(null, Date.now() + "-" + file.originalname);
-    }
-});
+const storage = multer.memoryStorage()
 const upload = multer({storage: storage});
 const app = express();
 
@@ -25,7 +18,7 @@ app.get("/", (req, res)=>{
 app.post("/docsave", upload.single('doc'), async (req, res) => {
     if (!req.file) return res.send("Erro: Arquivo não encontrado");
 
-    const response = await auditDocument(req.file.path);
+    const response = await auditDocument(req.file.buffer);
     // const docInfo = JSON.parse(response)
 
     // console.log(docInfo)
