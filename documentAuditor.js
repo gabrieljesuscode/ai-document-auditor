@@ -1,5 +1,3 @@
-const mistralModule = await import('@mistralai/mistralai');
-const Mistral = mistralModule.Mistral;
 
 const Tesseract = require('tesseract.js');
 require('dotenv').config();
@@ -8,7 +6,9 @@ const mistral = new Mistral({apiKey: process.env.MISTRAL_API_KEY});
 
 async function auditDocument(imagePath){
     try {
-        
+        const mistralModule = await import('@mistralai/mistralai');
+        const Mistral = mistralModule.Mistral;
+
         // Pegar o texto da imagem com uma OCR
         const { data: { text } } = await Tesseract.recognize(
             imagePath,
