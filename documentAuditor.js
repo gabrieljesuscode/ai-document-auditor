@@ -128,7 +128,7 @@ async function auditDocument(imageBuffer){
     } catch (error) {
 
         console.log("Error: validation failed", error);
-        return {Error: "Validation failed" + error}
+        return {Error: "Validation failed"}
 
     }
 }
