@@ -4,7 +4,7 @@
   "description": "An intelligent backend service that uses Google Gemini AI to audit documents, validating expiration dates and extracting structured data from invoices and receipts.",
   "license": "ISC",
   "author": "Gabriel da Silva de Jesus",
-  "type": "commonjs",
+  "type": "module",
   "main": "server.js",
   "dependencies": {
     "@google/genai": "^1.50.1",

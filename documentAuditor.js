@@ -1,76 +1,129 @@
-const fs = require('fs');
-const Tesseract = require('tesseract.js');
-require('dotenv').config();
+import { Mistral } from '@mistralai/mistralai';
+import fs from 'fs';
+import 'dotenv/config';
+import { json } from 'stream/consumers';
+
+const mistral = new Mistral({apiKey: process.env.MISTRAL_API_KEY});
+
+
+let today = new Date();
+const prompt = `Aja como um Auditor de Documentos Fiscais Brasileiro.  
+                Sua tarefa é analisar essa imagem e extrair dados estruturados para um sistema de gestão financeira.
+
+                REGRAS DE EXTRAÇÃO:
+                1. Identifique o 'documentType': 'NF-e' (Nota Fiscal Eletrônica), 'NFC-e' (Cupom Fiscal), 'Recibo' ou 'Comprovante_Pix'.
+                2. Extraia o CNPJ ou CPF do Emissor (loja/prestador).
+                3. Extraia a Data de Emissão e converta para o formato YYYY-MM-DD.
+                4. Extraia o Valor Total como um número (ex: 1250.80).
+                5. CHAVE DE ACESSO: Se for uma nota fiscal, extraia os 44 dígitos da chave de acesso (geralmente perto do código de barras).
+
+                REGRAS DE AUDITORIA (Pé no chão):
+                - Hoje é dia ${today}.
+                - 'isValid': Marque como true se a data de emissão for inferior a 90 dias.
+                - 'auditStatus': 
+                - 'GREEN': Documento legível, com CNPJ e dentro do prazo.
+                - 'YELLOW': Documento sem CNPJ ou com data superior a 90 dias.
+                - 'RED': Documento ilegível ou não é um comprovante de pagamento.
+
+                RESPONDA EXCLUSIVAMENTE EM JSON PURO:
+                {
+                "tipo": "string",
+                "emissor_cnpj": "string",
+                "data_emissao": "string",
+                "valor_total": number,
+                "chave_acesso": "string|null",
+                "auditoria": {
+                "is_valid": boolean,
+                "status": "string",
+                "alerta": "string (explicar o motivo se for YELLOW ou RED)"
+                }
+                }`
+
+
+let promptExample
+// JSON Schema exigido pela API (completo)
+const outputSchema = {
+  type: "object",
+  properties: {
+    tipo: {
+      type: "string",
+      enum: ["NF-e", "NFC-e", "Recibo", "Comprovante_Pix"],
+      description: "Tipo do documento fiscal"
+    },
+    emissor_cnpj: {
+      type: "string",
+      description: "CNPJ ou CPF do emissor"
+    },
+    data_emissao: {
+      type: "string",
+      format: "date",
+      description: "Data no formato YYYY-MM-DD"
+    },
+    valor_total: {
+      type: "number",
+      description: "Valor total do documento"
+    },
+    chave_acesso: {
+      type: ["string", "null"],
+      description: "Chave de acesso de 44 dígitos (se aplicável)"
+    },
+    auditoria: {
+      type: "object",
+      properties: {
+        is_valid: { type: "boolean" },
+        status: {
+          type: "string",
+          enum: ["GREEN", "YELLOW", "RED"]
+        },
+        alerta: { type: "string" }
+      },
+      required: ["is_valid", "status", "alerta"]
+    }
+  },
+  required: ["tipo", "emissor_cnpj", "data_emissao", "valor_total", "auditoria"]
+};
 
 async function auditDocument(imageBuffer){
     try {
-        const mistralModule = await import('@mistralai/mistralai');
-        const Mistral = mistralModule.Mistral;
+        console.log("Começando análise");
 
-        
-        const mistral = new Mistral({apiKey: process.env.MISTRAL_API_KEY});
+        // Tratar a URL da imagem para a Mistral OCR
+        const base64Image = imageBuffer.toString('base64');
+        const mimeType = 'image/png';
+        const imageUri = `data:${mimeType};base64,${base64Image}`
+        console.log("Imagem tratada para base64");
 
-        // Pegar o texto da imagem com uma OCR
-        const { data: { text } } = await Tesseract.recognize(
-        imageBuffer,
-        'por',
-        {
-            corePath: 'https://unpkg.com/tesseract.js-core@v6.0.0/tesseract-core.wasm.js',
-            langPath: 'https://tessdata.projectnaptha.com/4.0.0',
-        }
-        );
-
-        // Jogar o texto para a IA interpretar
+        // Enviar imagem para a IA interpretar
         const result = await mistral.chat.complete({
-        model: "mistral-small-latest",
-        messages: [
+            model: "pixtral-12b-2409", // O modelo 'Pixtral' ou 'Mistral-Large' são os que "veem" e "entendem"
+            messages: [
             {
-            content: `
-                            Aja como um Auditor de Documentos Fiscais Brasileiro. 
-                            Sua tarefa é analisar esse texto e extrair dados estruturados para um sistema de gestão financeira.
-
-                            O texto a seguir foi retirado de uma foto de um documento:
-                            ${text}
-
-                            REGRAS DE EXTRAÇÃO:
-                            1. Identifique o 'documentType': 'NF-e' (Nota Fiscal Eletrônica), 'NFC-e' (Cupom Fiscal), 'Recibo' ou 'Comprovante_Pix'.
-                            2. Extraia o CNPJ ou CPF do Emissor (loja/prestador).
-                            3. Extraia a Data de Emissão e converta para o formato YYYY-MM-DD.
-                            4. Extraia o Valor Total como um número (ex: 1250.80).
-                            5. CHAVE DE ACESSO: Se for uma nota fiscal, extraia os 44 dígitos da chave de acesso (geralmente perto do código de barras).
-
-                            REGRAS DE AUDITORIA (Pé no chão):
-                            - Hoje é dia 18/04/2026.
-                            - 'isValid': Marque como true se a data de emissão for inferior a 90 dias.
-                            - 'auditStatus': 
-                            - 'GREEN': Documento legível, com CNPJ e dentro do prazo.
-                            - 'YELLOW': Documento sem CNPJ ou com data superior a 90 dias.
-                            - 'RED': Documento ilegível ou não é um comprovante de pagamento.
-
-                            RESPONDA EXCLUSIVAMENTE EM JSON PURO:
-                            {
-                            "tipo": "string",
-                            "emissor_cnpj": "string",
-                            "data_emissao": "string",
-                            "valor_total": number,
-                            "chave_acesso": "string|null",
-                            "auditoria": {
-                            "is_valid": boolean,
-                            "status": "string",
-                            "alerta": "string (explicar o motivo se for YELLOW ou RED)"
-                            }
-                            }`,
-            role: "user",
-            },
+                role: "user",
+                content: [
+                { type: "text", text: prompt }, // O seu prompt gigante de auditor
+                { type: "image_url", imageUrl: imageUri } // O documento em si
+                ]
+            }
             ],
+            response_format: {
+            type: "json_schema",
+            json_schema: {
+                name: "auditoria_fiscal",
+                strict: true,
+                schema: outputSchema // O seu schema que você já definiu!
+            }
+            }
         });
+        console.log(result)
+        const mistralResponse = result.choices[0].message.content;
+        
+        console.log("Imagem enviada para IA");
 
         // Retornar o resultado da IA como um JSON limpo
-        let mistralContent = result.choices[0].message.content
-            
-        mistralContent = mistralContent.replace(/```json/, "").replace(/```/, "").trim();
+        const jsonClean = mistralResponse.toString().replace(/```json/,"").replace(/```/, "").trim();
+        console.log("Json enviado com sucesso")
+        return JSON.parse(jsonClean);
 
-        return JSON.parse(mistralContent);
     } catch (error) {
 
         console.log("Error: validation failed", error);
@@ -79,21 +132,8 @@ async function auditDocument(imageBuffer){
     }
 }
 
-module.exports = auditDocument;
+export default auditDocument;
 
 
-// async function run() {
-//   const result = await mistral.chat.complete({
-//     model: "mistral-small-latest",
-//     messages: [
-//       {
-//         content: "Who is the best French painter? Answer in one short sentence.",
-//         role: "user",
-//       },
-//     ],
-//   });
 
-//   console.log(result.choices[0].message.content);
-// }
 
-// run();

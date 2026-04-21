@@ -1,6 +1,7 @@
-const express = require('express');
-const auditDocument = require('./documentAuditor');
-const multer = require('multer');
+import express from 'express';
+import multer from 'multer';
+import auditDocument from './documentAuditor.js';
+
 const storage = multer.memoryStorage()
 const upload = multer({storage: storage});
 const app = express();
@@ -12,7 +13,7 @@ app.use(express.static("public"));
 app.use(express.json());
 
 app.get("/", (req, res)=>{
-    res.sendFile(__dirname + "/pages/home.html")
+    res.sendFile(process.cwd() + "/pages/home.html")
 });
 
 app.post("/docsave", upload.single('doc'), async (req, res) => {
