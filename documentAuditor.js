@@ -115,6 +115,7 @@ async function auditDocument(imageBuffer){
             }
         });
         console.log(result)
+
         const mistralResponse = result.choices[0].message.content;
         
         console.log("Imagem enviada para IA");
@@ -127,7 +128,7 @@ async function auditDocument(imageBuffer){
     } catch (error) {
 
         console.log("Error: validation failed", error);
-        return {Error: "Validation failed"}
+        return {Error: "Validation failed" + error}
 
     }
 }
