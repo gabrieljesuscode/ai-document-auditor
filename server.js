@@ -1,5 +1,4 @@
 const express = require('express');
-const analyzeDocument = require('./geminiAgent');
 const auditDocument = require('./documentAuditor')
 const multer = require('multer');
 const storage = multer.diskStorage({
