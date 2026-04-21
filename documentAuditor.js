@@ -12,8 +12,12 @@ async function auditDocument(imageBuffer){
 
         // Pegar o texto da imagem com uma OCR
         const { data: { text } } = await Tesseract.recognize(
-            imageBuffer,
-            'por', // Especificar o idioma português melhora a precisão
+        imageBuffer,
+        'por',
+        {
+            corePath: 'https://unpkg.com/tesseract.js-core@v6.0.0/tesseract-core.wasm.js',
+            langPath: 'https://tessdata.projectnaptha.com/4.0.0',
+        }
         );
 
         // Jogar o texto para a IA interpretar
