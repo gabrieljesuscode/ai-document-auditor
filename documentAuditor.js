@@ -27,7 +27,7 @@ const prompt = `Aja como um Auditor de Documentos Fiscais Brasileiro.
 
                 RESPONDA EXCLUSIVAMENTE EM JSON PURO:
                 {
-                "tipo": "string",
+                "documentType": "string",
                 "emissor_cnpj": "string",
                 "data_emissao": "string",
                 "valor_total": number,
@@ -40,7 +40,7 @@ const prompt = `Aja como um Auditor de Documentos Fiscais Brasileiro.
                 }`
 
 
-let promptExample
+
 // JSON Schema exigido pela API (completo)
 const outputSchema = {
   type: "object",

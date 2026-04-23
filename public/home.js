@@ -7,6 +7,11 @@ fileInput.addEventListener("change", (e) => {
     let file = e.target.value;
     
     let fileName = file.split("\\").pop();
+    let fileNameAndType = fileName.split("."); // Divide o nome do arquivo Exemplo: arquivo.png => [arquivo, png] 
+
+    if (fileNameAndType[0].length > 15) {
+        fileName = fileNameAndType[0].slice(0, 15) + "... ." + fileNameAndType[1];
+    }
     
     if (file) {
         button.disabled = false;
@@ -14,7 +19,7 @@ fileInput.addEventListener("change", (e) => {
         fileSelectorArea.innerHTML = fileName + " selecionado";
     } else {
         button.disabled = true;
-        
+        fileSelectorArea.style.backgroundColor = "#fff";
         fileSelectorArea.innerHTML = "Selecione a foto da sua nota fiscal<br>(.png, .jpg, .pdf)";
     }
 });
