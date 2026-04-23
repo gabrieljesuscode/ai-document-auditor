@@ -27,7 +27,11 @@ app.post("/audit", upload.single('doc'), async (req, res) => {
     // console.log(req.file.buffer)
     // const response = await auditDocument(req.file.buffer);
 
-    res.json(req.file.beffer);
+    // res.json(response);
+    const mimeType = req.file.mimetype; // ex: image/png, image/jpeg
+    const base64 = req.file.buffer.toString("base64");
+
+    res.send(`<img src="data:${mimeType};base64,${base64}" />`);
 });
 
 
