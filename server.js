@@ -24,10 +24,10 @@ app.get("/", (req, res)=>{
 app.post("/audit", upload.single('doc'), async (req, res) => {
     if (!req.file) return res.send("Erro: Arquivo não encontrado");
 
-    console.log(req.file.buffer)
-    const response = await auditDocument(req.file.buffer);
+    // console.log(req.file.buffer)
+    // const response = await auditDocument(req.file.buffer);
 
-    res.json(response);
+    res.json(req.file.beffer);
 });
 
 
